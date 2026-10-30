@@ -1,0 +1,8 @@
+node_modules/
+target/
+test-results/
+playwright-report/
+.mvn/wrapper/maven-wrapper.jar
+*.log
+.vscode/
+.idea/

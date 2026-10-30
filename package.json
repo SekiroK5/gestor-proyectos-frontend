@@ -1,0 +1,40 @@
+{
+  "name": "ejercicio5-cliente-pruebas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pruebas automaticas del frontend del Gestor de Proyectos",
+  "scripts": {
+    "test": "jest",
+    "test:cobertura": "jest --coverage",
+    "test:integracion": "playwright test"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "roots": [
+      "<rootDir>/src/test/js"
+    ],
+    "collectCoverageFrom": [
+      "src/main/resources/static/js/login.js",
+      "src/main/resources/static/js/register.js",
+      "src/main/resources/static/js/inicio.js"
+    ],
+    "coverageReporters": [
+      "text",
+      "html",
+      "json-summary",
+      "lcov"
+    ],
+    "coverageDirectory": "target/js-coverage"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.48.2",
+    "jest": "29.7.0",
+    "jest-environment-jsdom": "29.7.0",
+    "jquery": "3.7.1",
+    "jest-junit": "16.0.0"
+  },
+  "jest-junit": {
+    "outputDirectory": "target",
+    "outputName": "jest-junit.xml"
+  }
+}
