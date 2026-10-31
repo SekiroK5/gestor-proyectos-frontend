@@ -10,6 +10,7 @@ pipeline {
 
     environment {
         TRIVY_CACHE_DIR = '/var/jenkins_home/.cache/trivy'
+        // Trivy lee las dependencias del repositorio local de Maven (~/.m2) en lugar de pedirlas a Maven Central.
     }
 
     options {
@@ -62,19 +63,20 @@ pipeline {
         stage('Analisis SonarQube') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh 'mvn -B -ntp sonar:sonar'
+                    // El analizador de JS/CSS de Sonar corre en Node.js; se limita su memoria porque el equipo tiene poca RAM.
+                    sh 'mvn -B -ntp sonar:sonar -Dsonar.javascript.node.maxspace=512'
                 }
             }
         }
 
         stage('Escaneo de vulnerabilidades') {
             steps {
-                sh 'trivy fs --scanners vuln,secret,misconfig --skip-dirs target --skip-dirs node_modules --skip-dirs "**/target" --format table --output trivy-frontend.txt .'
-                sh 'trivy fs --scanners vuln,secret,misconfig --skip-dirs target --skip-dirs node_modules --skip-dirs "**/target" --format json --output trivy-frontend.json .'
+                sh 'trivy fs --offline-scan --skip-version-check --scanners vuln,secret,misconfig --skip-dirs target --skip-dirs node_modules --skip-dirs "**/target" --format table --output trivy-frontend.txt .'
+                sh 'trivy fs --offline-scan --skip-version-check --scanners vuln,secret,misconfig --skip-dirs target --skip-dirs node_modules --skip-dirs "**/target" --format json --output trivy-frontend.json .'
                 sh 'cat trivy-frontend.txt'
                 script {
                     def graves = sh(returnStatus: true,
-                        script: 'trivy fs --scanners vuln,secret --skip-dirs target --skip-dirs node_modules --skip-dirs "**/target" --severity HIGH,CRITICAL --exit-code 1 --quiet .')
+                        script: 'trivy fs --offline-scan --skip-version-check --scanners vuln,secret --skip-dirs target --skip-dirs node_modules --skip-dirs "**/target" --severity HIGH,CRITICAL --exit-code 1 --quiet .')
                     if (graves != 0) {
                         unstable('Trivy encontro vulnerabilidades HIGH o CRITICAL, revisar trivy-frontend.txt')
                     }
