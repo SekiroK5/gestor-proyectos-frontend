@@ -63,9 +63,9 @@ pipeline {
         stage('Analisis SonarQube') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    // El analizador de JS/CSS de Sonar corre en Node.js; se limita su memoria porque el equipo tiene poca RAM.
+                    // Se analiza el codigo Java; el JavaScript ya se valida con Jest en la etapa anterior.
                     withEnv(['MAVEN_OPTS=-Xmx512m']) {
-                        sh 'mvn -B -ntp sonar:sonar -Dsonar.javascript.node.maxspace=512'
+                        sh 'mvn -B -ntp sonar:sonar'
                     }
                 }
             }

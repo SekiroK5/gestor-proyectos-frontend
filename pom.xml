@@ -22,15 +22,15 @@
 		<jackson-bom.version>2.21.7</jackson-bom.version>
 		<tomcat.version>10.1.59</tomcat.version>
 		<log4j2.version>2.25.5</log4j2.version>
-		<!-- Analisis de SonarQube: codigo propio (Java y JavaScript de static/js), sin target, node_modules ni librerias de terceros -->
+		<!-- Analisis de SonarQube: codigo Java propio, sin target ni node_modules. El JavaScript se valida con Jest (cobertura en el pipeline);
+		     el analizador JS de Sonar necesita ~700 MB extra que el equipo de CI no tiene (ver docs/DOCUMENTO-TECNICO.md). -->
 		<sonar.projectKey>gestor-proyectos-frontend</sonar.projectKey>
 		<sonar.projectName>Gestor de Proyectos - Frontend</sonar.projectName>
-		<sonar.sources>src/main/java,src/main/resources/static/js</sonar.sources>
-		<sonar.tests>src/test</sonar.tests>
-		<sonar.exclusions>**/target/**,**/node_modules/**,**/static/js/bootstrap*,**/static/js/jquery*,**/static/js/popper*,**/static/css/bootstrap*,**/static/Images/**</sonar.exclusions>
+		<sonar.sources>src/main/java</sonar.sources>
+		<sonar.tests>src/test/java</sonar.tests>
+		<sonar.exclusions>**/target/**,**/node_modules/**</sonar.exclusions>
 		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-		<sonar.javascript.lcov.reportPaths>${project.build.directory}/js-coverage/lcov.info</sonar.javascript.lcov.reportPaths>
-		<sonar.coverage.exclusions>**/Ejercicio5ClienteApplication.java,**/templates/**,**/static/js/pplmproyecto.js,**/static/js/proyecto.js</sonar.coverage.exclusions>
+		<sonar.coverage.exclusions>**/Ejercicio5ClienteApplication.java</sonar.coverage.exclusions>
 	</properties>
 	<dependencies>
 		<dependency>
