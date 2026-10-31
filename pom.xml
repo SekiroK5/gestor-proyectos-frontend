@@ -22,10 +22,10 @@
 		<jackson-bom.version>2.21.7</jackson-bom.version>
 		<tomcat.version>10.1.59</tomcat.version>
 		<log4j2.version>2.25.5</log4j2.version>
-		<!-- Analisis de SonarQube: codigo propio (Java y JavaScript), sin target, node_modules ni librerias de terceros -->
+		<!-- Analisis de SonarQube: codigo propio (Java y JavaScript de static/js), sin target, node_modules ni librerias de terceros -->
 		<sonar.projectKey>gestor-proyectos-frontend</sonar.projectKey>
 		<sonar.projectName>Gestor de Proyectos - Frontend</sonar.projectName>
-		<sonar.sources>src/main/java,src/main/resources</sonar.sources>
+		<sonar.sources>src/main/java,src/main/resources/static/js</sonar.sources>
 		<sonar.tests>src/test</sonar.tests>
 		<sonar.exclusions>**/target/**,**/node_modules/**,**/static/js/bootstrap*,**/static/js/jquery*,**/static/js/popper*,**/static/css/bootstrap*,**/static/Images/**</sonar.exclusions>
 		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>

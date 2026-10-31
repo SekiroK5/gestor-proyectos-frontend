@@ -1,0 +1,7 @@
+# Vulnerabilidades revisadas y aceptadas (ver docs/DOCUMENTO-TECNICO.md, seccion 4, incidencia 7).
+# Solo hay correccion en Spring Framework 7.0.9 (Spring Boot 4); el frontend no usa las funciones afectadas.
+
+# Spring MVC XsltView: RCE/SSRF solo si se usa XsltView. El frontend usa vistas Thymeleaf, no XSLT.
+CVE-2026-47884
+# Spring MVC/WebFlux: corrupcion de SSE con fragmentos de vista. El frontend no usa Server-Sent Events.
+CVE-2026-47890

@@ -64,7 +64,9 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     // El analizador de JS/CSS de Sonar corre en Node.js; se limita su memoria porque el equipo tiene poca RAM.
-                    sh 'mvn -B -ntp sonar:sonar -Dsonar.javascript.node.maxspace=512'
+                    withEnv(['MAVEN_OPTS=-Xmx512m']) {
+                        sh 'mvn -B -ntp sonar:sonar -Dsonar.javascript.node.maxspace=512'
+                    }
                 }
             }
         }
