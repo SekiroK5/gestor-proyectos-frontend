@@ -35,18 +35,20 @@ Cada repositorio conserva los dos archivos en `docs/pom/`: `pom-original.xml` (t
 | Microservicio | Cambio | Motivo |
 |---|---|---|
 | Backend | Los endpoints reciben DTOs (`dto/*Dto`, records de Java) y los repositorios se inyectan por constructor | Hallazgos de SonarQube (incidencia 10). |
+| Backend | Contraseñas con BCrypt (costo 12): el alta y la actualización guardan el hash, el login busca por correo y valida con `matches`, y ninguna respuesta incluye la contraseña | Vulnerabilidad de la base de datos (incidencia 12). |
 | Backend | Driver `postgresql` en lugar de `mariadb-java-client` | `application.properties` apunta a PostgreSQL; con el driver de MariaDB la API no arrancaba. |
 | Backend | `GenerationType.IDENTITY` en las 5 entidades | Con `AUTO`, Hibernate 6 crea secuencias propias que ignoran la columna identity y generan ids repetidos. |
 | Backend | Búsquedas por id regresan 404 y las bajas validan `existsById` | Antes respondían 200 con un objeto vacío y "1" al borrar un id inexistente. |
 | Backend | Conexión configurable con `DB_URL`, `DB_USER`, `DB_PASSWORD`; propiedad `spring.datasource.driver-class-name` | Permite apuntar a la base de Docker desde Jenkins; la propiedad anterior (`dbcp2.driver-class-name`) no tenía efecto. |
 | Frontend | `RestTemplate` inyectado (`config/RestConfig`) y URL de la API en `api.url` / `API_URL` | Antes se creaba un `RestTemplate` y se escribía `http://localhost:8081` en cada método; así no se podía probar ni configurar por entorno. |
+| Frontend | `integrity` (SRI sha384) y `crossorigin` en los CSS de CDN de `home.html` y `proyecto.html` | Hallazgo de Semgrep html.security.audit.missing-integrity (incidencia 11). |
 | Frontend | Correcciones de la práctica 2 (aviso de error en login, mensaje al fallar la carga de proyectos, id del fondo al editar, validación del rol) | Fallas encontradas por las pruebas automáticas. |
 
 ## 2. Pruebas y cobertura
 
 | Microservicio | Pruebas | Métodos | Líneas | Herramienta |
 |---|---|---|---|---|
-| Backend | 54 (JUnit 5 + MockMvc + Mockito) | **100 %** (111/111) | 100 % | JaCoCo |
+| Backend | 58 (JUnit 5 + MockMvc + Mockito) | **100 %** (116/116) | 100 % | JaCoCo |
 | Frontend Java | 30 (JUnit 5 + MockRestServiceServer) | **100 %** (96/96) | 100 % | JaCoCo |
 | Frontend JavaScript | 24 (Jest + jsdom) | 86 % de funciones | 94.5 % | Istanbul (lcov) |
 
@@ -56,7 +58,7 @@ Las pruebas validan resultados (códigos HTTP, cuerpo de la respuesta, datos env
 
 - `Ejercicio5MyApiGestorApplication` y `Ejercicio5ClienteApplication`: solo contienen `main()` con `SpringApplication.run(...)`. El arranque del contexto sí se prueba con `contextLoads`, pero el `main` no es lógica evaluable.
 - En el frontend, `proyecto.js` y `pplmproyecto.js` (vista de tareas) quedan fuera del cálculo de cobertura de Sonar: dependen de la sesión del navegador y de Bootstrap en tiempo real, y se cubren con las pruebas de integración (Playwright) de la práctica 2.
-- Ramas: 84 % en el backend. Antes eran 71 % por la validación `!objeto.equals(null)`, que nunca podía ser falsa; se eliminó al atender el hallazgo java:S2159 de SonarQube (incidencia 10).
+- Ramas: 90 % en el backend. Antes eran 71 % por la validación `!objeto.equals(null)`, que nunca podía ser falsa; se eliminó al atender el hallazgo java:S2159 de SonarQube (incidencia 10).
 
 ## 3. Integración continua en Docker
 
@@ -102,6 +104,8 @@ Configuración en Jenkins:
 | 8 | SonarQube (frontend #1–#3) | El analizador de JavaScript de Sonar (Node.js) no arrancaba o agotaba la memoria de Docker, que llegó a dejar de responder | Infraestructura (memoria) | El equipo tiene 7.3 GB de RAM. Se limitó la memoria de SonarQube, Jenkins usa un solo ejecutor, los contenedores se reinician solos y el frontend analiza en Sonar solo el código Java; el JavaScript queda cubierto por Jest (24 pruebas, 94.5 % de líneas). |
 | 9 | Revisión de datos | El volcado original de la base tenía nombres, correos y contraseñas reales en texto plano | Exposición de datos personales | No se subió a los repositorios públicos; `database/datos.sql` usa datos ficticios. |
 | 10 | SonarQube (backend #4) | 33 hallazgos: 18 vulnerabilidades java:S4684 (entidades JPA como `@RequestBody`, riesgo de *mass assignment*), 10 bugs java:S2159 (`!obj.equals(null)` siempre verdadero) y 5 code smells java:S6813 (inyección por atributo) | Reales | DTOs como records para la entrada de cada endpoint, inyección por constructor y eliminación de las comparaciones inútiles. El frontend quedó en 0 hallazgos. |
+| 11 | Semgrep (`p/default`, sin `target`) | Código original: 20 hallazgos (18 `spring-http-request` por URLs `http://localhost:8081` fijas en `GestorController` y 2 `missing-integrity` en CSS de CDN). Después de la migración quedaban los 2 de `missing-integrity` | Reales | Las URLs ya se habían externalizado (`RestConfig` y `api.url`); se agregó `integrity` + `crossorigin` a los dos CSS. Semgrep queda en 0. |
+| 12 | Auditoría de la base de datos | Contraseñas en texto plano, sin llaves foráneas, columnas obligatorias que aceptaban NULL y correo sin `UNIQUE` | Reales | BCrypt en el backend; en `schema.sql`: 4 llaves foráneas con `ON DELETE CASCADE`, `NOT NULL`, `UNIQUE` en el correo y `CHECK` de hash BCrypt y de rol. `verificacion.sql` comprueba las llaves, que no haya contraseñas planas y que la base rechace una contraseña plana y un correo repetido. |
 
 ## 5. Cómo reproducir
 
