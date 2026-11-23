@@ -143,8 +143,9 @@ public class GestorController {
 	public ResponseEntity<Usuario> verificarUsuario(@RequestBody Usuario paramUser) {
 		String urlservicebd = apiUrl + "/getUsuarioLogin";
 		ResponseEntity<Usuario> response = template.postForEntity(urlservicebd,paramUser,Usuario.class);
-		
-		return response;
+
+		// Se devuelve solo el cuerpo: reenviar los encabezados de la API (Transfer-Encoding) rompe la respuesta detras de un proxy (Railway).
+		return ResponseEntity.ok(response.getBody());
 
 	}
 	
@@ -281,14 +282,14 @@ public class GestorController {
 	public ResponseEntity<Integer> verificarTarea(@RequestBody Tareas paramName){
 		String urlservicebd = apiUrl + "/addTareas";
 		ResponseEntity<Integer> response = template.postForEntity(urlservicebd, paramName, Integer.class);
-		return response;
+		return ResponseEntity.ok(response.getBody());
 	}
 	
 	@PostMapping("/cambiosTareas")
 	public ResponseEntity<Integer> cambiosTareas(@RequestBody Tareas paramDatos){
 		String urlservicebd = apiUrl + "/addTareas";
 		ResponseEntity<Integer> response = template.postForEntity(urlservicebd, paramDatos, Integer.class);
-		return response;
+		return ResponseEntity.ok(response.getBody());
 	}
 	
 	@PostMapping("/consultarTareas")
