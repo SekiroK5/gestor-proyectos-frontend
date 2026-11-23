@@ -117,3 +117,23 @@ docker compose up -d
 ```
 
 Jenkins queda en http://localhost:8080 y SonarQube en http://localhost:9000. Los tres jobs apuntan a la rama `main` de los repositorios de GitHub.
+
+## 6. Despliegue de la aplicación con imágenes Docker
+
+Cada microservicio tiene un `Dockerfile` multi-etapa en la raíz de su repositorio:
+
+| Imagen | Etapa de compilación | Etapa de ejecución | Puerto |
+|---|---|---|---|
+| `gestor-backend:1.0` | `maven:3.9.11-eclipse-temurin-21` (`mvn package`) | `eclipse-temurin:21-jre`, usuario sin privilegios, `HEALTHCHECK` | 8081 |
+| `gestor-frontend:1.0` | `maven:3.9.11-eclipse-temurin-21` (`mvn package`) | `eclipse-temurin:21-jre`, usuario sin privilegios, `HEALTHCHECK` | 8080 (publicado en 8082) |
+
+`deploy/docker-compose.yml` (repo backend) levanta la aplicación completa: PostgreSQL 16 con `schema.sql` y `datos.sql`,
+el backend conectado con `DB_URL` / `DB_USER` / `DB_PASSWORD` y el frontend conectado a la API con `API_URL=http://backend:8081`.
+No hubo que cambiar el código: esas variables ya existían desde la migración a Java 21.
+
+```bash
+cd gestor-proyectos-backend/deploy
+docker compose up -d --build      # http://localhost:8082
+```
+
+Instrucciones completas en `deploy/README.md` del repositorio backend.
